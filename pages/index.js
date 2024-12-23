@@ -239,7 +239,7 @@ export default function Home() {
 		<PrimeReactProvider value={value}>
 			<div className={styles.container}>
 				<Head>
-					<title>Create Next App</title>
+					<title>OCR Tesseract example with tesseract.js</title>
 					<link rel="icon" href="/favicon.ico" />
 				</Head>
 
