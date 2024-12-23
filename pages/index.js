@@ -15,6 +15,7 @@ import 'primeflex/primeflex.css';
 import 'primereact/resources/primereact.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
 import { createWorker } from 'tesseract.js';
+import { ProgressSpinner } from 'primereact/progressspinner';
 
 export function TemplateDemo() {
 	const toast = useRef(null);
@@ -22,13 +23,20 @@ export function TemplateDemo() {
 	const [files, setFiles] = useState([]);
 	const fileUploadRef = useRef(null);
 	const [text, setText] = useState('');
+	const [loader, setLoader] = useState(false);
 
 	useEffect(() => {
 		(async () => {
+			if (files.length === 0) {
+				setText('');
+			}
 			const worker = await createWorker('eng');
 			for (let x = 0; x < files.length; x += 1) {
+				setLoader(true);
 				const ret = await worker.recognize(files[x]);
 				console.log(ret.data.text);
+				console.log(ret.data, 'ret.data');
+				setLoader(false);
 				setText(ret.data.text);
 			}
 
@@ -62,6 +70,7 @@ export function TemplateDemo() {
 	const onTemplateRemove = (file, callback) => {
 		setTotalSize(totalSize - file.size);
 		callback();
+		setFiles([]);
 	};
 
 	const onTemplateClear = () => {
@@ -163,7 +172,7 @@ export function TemplateDemo() {
 				ref={fileUploadRef}
 				name="demo[]"
 				accept="image/*"
-				maxFileSize={1000000}
+				maxFileSize={10000000}
 				onUpload={onTemplateUpload}
 				onSelect={onTemplateSelect}
 				onError={onTemplateClear}
@@ -175,9 +184,30 @@ export function TemplateDemo() {
 				uploadOptions={uploadOptions}
 				cancelOptions={cancelOptions}
 			/>
+
+			{loader ? (
+				<div style={{ marginTop: '20px', marginLeft: 'auto', marginRight: 'auto', display: 'flex' }}>
+					<ProgressSpinner
+						style={{
+							width: '50px',
+							height: '50px',
+						}}
+						strokeWidth="8"
+						fill="var(--surface-ground)"
+						animationDuration=".5s"
+					/>
+				</div>
+			) : null}
+
 			{text.length && files.length ? (
 				<div style={{ marginTop: '30px' }}>
-					<Editor value={text} onTextChange={(e) => setText(e.htmlValue)} style={{ height: '320px' }} />
+					<h2>OCR Output:</h2>
+					<Editor
+						value={text}
+						readOnly
+						onTextChange={(e) => setText(e.htmlValue)}
+						style={{ height: '320px' }}
+					/>
 				</div>
 			) : null}
 		</div>
@@ -217,7 +247,7 @@ export default function Home() {
 					<h1 className={styles.title}>
 						Welcome to{' '}
 						<a target="_new" href="https://github.com/tesseract-ocr/tesseract">
-							OCR Teserract Example!
+							OCR Example!
 						</a>
 					</h1>
 
